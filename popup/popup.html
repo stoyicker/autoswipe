@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <img src="../icons/icon48.png" alt="" class="logo">
+      <div>
+        <h1>AutoSwipe</h1>
+        <p class="tagline">Auto-like on dating apps</p>
+      </div>
+    </header>
+
+    <!-- Shown when on a supported site -->
+    <section id="activeView" class="hidden">
+      <div class="current-site">
+        <span id="siteIcon" class="site-icon"></span>
+        <span id="siteName" class="site-name"></span>
+        <span id="siteStatus" class="site-status">Idle</span>
+      </div>
+
+      <button id="toggleBtn" class="btn-toggle" data-running="false">
+        Start Swiping
+      </button>
+
+      <div class="speed-controls">
+        <label>
+          <span class="label-text">Min Delay</span>
+          <input type="range" id="minDelay" min="500" max="10000" step="100" value="1000">
+          <span class="delay-val" id="minDelayVal">1.0s</span>
+        </label>
+        <label>
+          <span class="label-text">Max Delay</span>
+          <input type="range" id="maxDelay" min="500" max="10000" step="100" value="3000">
+          <span class="delay-val" id="maxDelayVal">3.0s</span>
+        </label>
+      </div>
+
+    </section>
+
+    <!-- Shown when NOT on a supported site -->
+    <section id="inactiveView" class="hidden">
+      <div class="inactive-msg">
+        <p>Navigate to a supported site to start swiping:</p>
+        <ul>
+          <li>Tinder</li>
+          <li>Bumble</li>
+          <li>Badoo</li>
+          <li>Boo</li>
+        </ul>
+      </div>
+    </section>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

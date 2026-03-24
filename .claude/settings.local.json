@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:gist.github.com)",
+      "WebFetch(domain:ithy.com)",
+      "WebFetch(domain:auto-swiper.ch)",
+      "Bash(node:*)"
+    ]
+  }
+}

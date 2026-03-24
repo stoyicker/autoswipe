@@ -1,0 +1,60 @@
+{
+  "manifest_version": 3,
+  "name": "AutoSwipe",
+  "version": "1.0.0",
+  "description": "Auto-swipe (like) profiles on Tinder, Bumble, Badoo, and Boo.",
+  "permissions": [
+    "storage",
+    "activeTab",
+    "tabs",
+    "debugger"
+  ],
+  "host_permissions": [
+    "https://tinder.com/*",
+    "https://*.tinder.com/*",
+    "https://bumble.com/*",
+    "https://*.bumble.com/*",
+    "https://badoo.com/*",
+    "https://*.badoo.com/*",
+    "https://boo.world/*",
+    "https://*.boo.world/*"
+  ],
+  "background": {
+    "service_worker": "background/service-worker.js"
+  },
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://tinder.com/*", "https://*.tinder.com/*"],
+      "js": ["content/common.js", "content/tinder.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["https://bumble.com/*", "https://*.bumble.com/*"],
+      "js": ["content/common.js", "content/bumble.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["https://badoo.com/*", "https://*.badoo.com/*"],
+      "js": ["content/common.js", "content/badoo.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["https://boo.world/*", "https://*.boo.world/*"],
+      "js": ["content/common.js", "content/boo.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}
