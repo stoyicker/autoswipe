@@ -63,7 +63,9 @@ async function showActiveView(platformId, tabId) {
 
     try {
       await chrome.tabs.sendMessage(tabId, { type: msgType });
-      updateRunningUI(!isRunning);
+      // Ask the content script for actual state instead of assuming
+      const status = await chrome.tabs.sendMessage(tabId, { type: 'GET_STATUS' });
+      updateRunningUI(status?.running ?? !isRunning);
     } catch {
       // Content script not available
     }
@@ -84,6 +86,7 @@ async function showActiveView(platformId, tabId) {
 function updateRunningUI(running) {
   const btn = document.getElementById('toggleBtn');
   const status = document.getElementById('siteStatus');
+  if (!btn || !status) return;
 
   btn.dataset.running = String(running);
   btn.textContent = running ? 'Stop Swiping' : 'Start Swiping';

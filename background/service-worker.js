@@ -22,21 +22,28 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   switch (msg.type) {
     case 'GET_STATE':
       sendResponse(state);
-      break;
+      return false;
 
     case 'UPDATE_SETTINGS':
       state.settings = { ...state.settings, ...msg.settings };
       chrome.storage.local.set({ settings: state.settings });
       broadcastToContentScripts({ type: 'SETTINGS_UPDATED', settings: state.settings });
       sendResponse({ ok: true });
-      break;
+      return false;
 
     case 'SEND_KEY':
       handleSendKey(msg, sender).then(
         (result) => sendResponse(result),
         (err) => sendResponse({ ok: false, error: err.message })
       );
-      return true; // async response
+      return true;
+
+    case 'SEND_CLICK':
+      handleSendClick(msg, sender).then(
+        (result) => sendResponse(result),
+        (err) => sendResponse({ ok: false, error: err.message })
+      );
+      return true;
 
     case 'DETACH_DEBUGGER':
       if (sender.tab?.id && attachedTabs.has(sender.tab.id)) {
@@ -44,10 +51,13 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         attachedTabs.delete(sender.tab.id);
       }
       sendResponse({ ok: true });
-      break;
-  }
+      return false;
 
-  return true;
+    default:
+      // Don't claim ownership of messages we don't handle (like ENGINE_STOPPED)
+      // so they can reach other listeners (popup)
+      return false;
+  }
 });
 
 async function handleSendKey(msg, sender) {
@@ -60,10 +70,8 @@ async function handleSendKey(msg, sender) {
   if (!attachedTabs.has(tabId)) {
     await chrome.debugger.attach({ tabId }, '1.3');
     attachedTabs.add(tabId);
-    console.log(`[AutoSwipe] Debugger attached to tab ${tabId}`);
   }
 
-  // Send trusted keydown + keyup via Chrome DevTools Protocol
   await chrome.debugger.sendCommand({ tabId }, 'Input.dispatchKeyEvent', {
     type: 'keyDown',
     key,
@@ -80,7 +88,38 @@ async function handleSendKey(msg, sender) {
     nativeVirtualKeyCode: key === 'ArrowRight' ? 39 : key === 'ArrowLeft' ? 37 : 0,
   });
 
-  console.log(`[AutoSwipe] Sent trusted ${key} to tab ${tabId}`);
+  return { ok: true };
+}
+
+async function handleSendClick(msg, sender) {
+  const tabId = sender.tab?.id;
+  if (!tabId) return { ok: false, error: 'No tab' };
+
+  const { x, y } = msg;
+
+  // Attach debugger if not already attached
+  if (!attachedTabs.has(tabId)) {
+    await chrome.debugger.attach({ tabId }, '1.3');
+    attachedTabs.add(tabId);
+  }
+
+  // Send trusted mouse click via Chrome DevTools Protocol
+  await chrome.debugger.sendCommand({ tabId }, 'Input.dispatchMouseEvent', {
+    type: 'mousePressed',
+    x,
+    y,
+    button: 'left',
+    clickCount: 1,
+  });
+
+  await chrome.debugger.sendCommand({ tabId }, 'Input.dispatchMouseEvent', {
+    type: 'mouseReleased',
+    x,
+    y,
+    button: 'left',
+    clickCount: 1,
+  });
+
   return { ok: true };
 }
 
@@ -89,9 +128,12 @@ chrome.tabs.onRemoved.addListener((tabId) => {
   attachedTabs.delete(tabId);
 });
 
-// Clean up when debugger detaches externally
+// Clean up when debugger detaches externally (user clicked cancel on the banner)
 chrome.debugger.onDetach.addListener((source) => {
-  if (source.tabId) attachedTabs.delete(source.tabId);
+  if (source.tabId) {
+    attachedTabs.delete(source.tabId);
+    chrome.tabs.sendMessage(source.tabId, { type: 'STOP_SWIPING' }).catch(() => {});
+  }
 });
 
 async function broadcastToContentScripts(msg) {
