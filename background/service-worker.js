@@ -105,6 +105,12 @@ async function handleSendClick(msg, sender) {
 
   // Send trusted mouse click via Chrome DevTools Protocol
   await chrome.debugger.sendCommand({ tabId }, 'Input.dispatchMouseEvent', {
+    type: 'mouseMoved',
+    x,
+    y,
+  });
+
+  chrome.debugger.sendCommand({ tabId }, 'Input.dispatchMouseEvent', {
     type: 'mousePressed',
     x,
     y,

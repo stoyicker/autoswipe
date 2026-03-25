@@ -97,7 +97,11 @@ class AutoSwipeEngine {
       return;
     }
 
-    await this._performSwipe(myTickId);
+    try {
+      await this._performSwipe(myTickId);
+    } catch (e) {
+      console.log('[AutoSwipe] _performSwipe error:', e.message);
+    }
 
     if (!this.running || myTickId !== this.tickId) return;
 
@@ -107,7 +111,7 @@ class AutoSwipeEngine {
 
   async _performSwipe(myTickId) {
     if (this.config.beforeSwipe) {
-      const result = this.config.beforeSwipe();
+      const result = await this.config.beforeSwipe();
       if (result === false) {
         this.stop();
         if (this._isContextValid()) {
