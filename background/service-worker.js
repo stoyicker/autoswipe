@@ -110,7 +110,7 @@ async function handleSendClick(msg, sender) {
     y,
   });
 
-  chrome.debugger.sendCommand({ tabId }, 'Input.dispatchMouseEvent', {
+  await chrome.debugger.sendCommand({ tabId }, 'Input.dispatchMouseEvent', {
     type: 'mousePressed',
     x,
     y,

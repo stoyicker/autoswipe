@@ -5,6 +5,7 @@
 
 let groupIndex = 0;
 let navigatingToGrid = false;
+let waitingForGroupLoad = false;
 
 function getPage() {
   const path = window.location.pathname;
@@ -14,20 +15,27 @@ function getPage() {
 }
 
 function hasUpsellPopup() {
-  return !!document.querySelector('div[role="dialog"]');
+  const dialog = document.querySelector('div[role="dialog"]');
+  return dialog && dialog.offsetParent !== null;
 }
 
 function hasBeacon() {
   const output = document.querySelector('output');
   if (output) {
-    if (output.querySelector('span[class*="beacon__"]')) return true;
+    if (output.querySelector('span[class*="beacon__"]')) {
+      console.log('[AS] hasBeacon: found beacon span in <output>');
+      return true;
+    }
   }
 
   // "Back to Explore" button means the group is exhausted (explore groups only)
   if (getPage() !== 'recs') {
     const buttons = document.querySelectorAll('button');
     for (const btn of buttons) {
-      if (btn.textContent.includes('Back to Explore')) return true;
+      if (btn.textContent.includes('Back to Explore')) {
+        console.log('[AS] hasBeacon: found "Back to Explore" button');
+        return true;
+      }
     }
   }
 
@@ -40,6 +48,7 @@ function getGroupButtons() {
 
 async function clickGroupAtIndex(index) {
   const buttons = getGroupButtons();
+  console.log(`[AS] clickGroupAtIndex(${index}): ${buttons.length} buttons found`);
 
   if (index >= buttons.length) return false;
 
@@ -47,11 +56,14 @@ async function clickGroupAtIndex(index) {
   const rect = btn.getBoundingClientRect();
   const x = Math.round(rect.left + rect.width / 2);
   const y = Math.round(rect.top + rect.height / 2);
+  console.log(`[AS] button rect:`, rect, `clicking at (${x}, ${y}), visible=${btn.offsetParent !== null}`);
 
   try {
     const result = await chrome.runtime.sendMessage({ type: 'SEND_CLICK', x, y });
+    console.log(`[AS] SEND_CLICK result:`, result);
     if (!result?.ok) return false;
-  } catch {
+  } catch (e) {
+    console.log(`[AS] SEND_CLICK error:`, e.message);
     return false;
   }
 
@@ -64,43 +76,68 @@ const engine = new AutoSwipeEngine({
 
   beforeSwipe() {
     const page = getPage();
+    console.log(`[AS] beforeSwipe page=${page}, url=${window.location.pathname}, groupIndex=${groupIndex}, waitingForGroupLoad=${waitingForGroupLoad}`);
 
-    if (hasUpsellPopup()) return false;
+    if (hasUpsellPopup()) {
+      console.log('[AS] upsell popup detected — stopping');
+      return false;
+    }
 
     if (page === 'recs') {
-      if (hasBeacon()) return false;
+      if (hasBeacon()) {
+        console.log('[AS] beacon on recs — stopping');
+        return false;
+      }
       return;
     }
 
-    if (page === 'explore') {
-      if (navigatingToGrid) {
-        navigatingToGrid = false;
+    if (page === 'explore' || page === 'explore-group') {
+      // After clicking a group, wait for profiles to load (beacon to disappear)
+      if (waitingForGroupLoad) {
+        const beacon = hasBeacon();
+        console.log(`[AS] waitingForGroupLoad: hasBeacon=${beacon}, page=${getPage()}, url=${window.location.pathname}`);
+        if (beacon) {
+          return 'skip';
+        }
+        console.log(`[AS] group ${groupIndex} loaded, resuming swipes`);
+        waitingForGroupLoad = false;
+        groupIndex++;
+        return;
       }
 
-      clickGroupAtIndex(groupIndex).then((ok) => {
-        if (!ok) {
-          engine.stop();
-          if (engine._isContextValid()) {
-            chrome.runtime.sendMessage({ type: 'ENGINE_STOPPED' }).catch(() => {});
-          }
-        }
-      });
-
-      groupIndex++;
-      return 'skip';
-    }
-
-    if (page === 'explore-group') {
       if (hasBeacon()) {
-        navigatingToGrid = true;
-        window.location.href = '/app/explore';
+        const buttons = getGroupButtons();
+        console.log(`[AS] exhausted, clicking next group ${groupIndex}/${buttons.length - 1}`);
+
+        if (page === 'explore-group') {
+          navigatingToGrid = true;
+          window.location.href = '/app/explore';
+          return 'skip';
+        }
+
+        // On explore grid — click the next group
+        waitingForGroupLoad = true;
+        const clickIdx = groupIndex;
+        clickGroupAtIndex(clickIdx).then((ok) => {
+          console.log(`[AS] clickGroupAtIndex(${clickIdx}) result: ${ok}`);
+          if (!ok) {
+            waitingForGroupLoad = false;
+            engine.stop();
+            if (engine._isContextValid()) {
+              chrome.runtime.sendMessage({ type: 'ENGINE_STOPPED' }).catch(() => {});
+            }
+          }
+        });
         return 'skip';
       }
+
+      console.log('[AS] profiles visible — swiping');
       return;
     }
   },
 
   afterSwipe() {
-    if (hasUpsellPopup() || hasBeacon()) return false;
+    if (hasUpsellPopup()) return false;
+    if (!waitingForGroupLoad && hasBeacon()) return false;
   },
 });
