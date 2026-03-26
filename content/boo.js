@@ -18,4 +18,8 @@ const engine = new AutoSwipeEngine({
 
     return 'skip';
   },
+
+  afterSwipe() {
+    if (!document.querySelector('button[aria-label="Love"]')) return false;
+  },
 });

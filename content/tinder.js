@@ -99,4 +99,8 @@ const engine = new AutoSwipeEngine({
       return;
     }
   },
+
+  afterSwipe() {
+    if (hasUpsellPopup() || hasBeacon()) return false;
+  },
 });

@@ -105,6 +105,21 @@ class AutoSwipeEngine {
 
     if (!this.running || myTickId !== this.tickId) return;
 
+    // Check right after swipe (with a brief pause for the UI to update)
+    if (this.config.afterSwipe) {
+      await new Promise((r) => setTimeout(r, 500));
+      const result = await this.config.afterSwipe();
+      if (result === false) {
+        this.stop();
+        if (this._isContextValid()) {
+          chrome.runtime.sendMessage({ type: 'ENGINE_STOPPED' }).catch(() => {});
+        }
+        return;
+      }
+    }
+
+    if (!this.running || myTickId !== this.tickId) return;
+
     const delay = this._randomDelay();
     this.timeout = setTimeout(() => this._tick(myTickId), delay);
   }
