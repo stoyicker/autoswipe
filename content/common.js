@@ -16,6 +16,7 @@ class AutoSwipeEngine {
     this._initMessageListener();
     this._loadSettings();
     this._initUnloadListener();
+    this._checkAutoResume();
   }
 
   _isContextValid() {
@@ -69,8 +70,22 @@ class AutoSwipeEngine {
 
   _initUnloadListener() {
     window.addEventListener('beforeunload', () => {
-      if (this.running) this.stop();
+      if (this.running && !this._resumeAfterReload) this.stop();
     });
+  }
+
+  scheduleReload() {
+    this._resumeAfterReload = true;
+    sessionStorage.setItem('autoswipe_resume', this.config.platformId);
+    window.location.reload();
+  }
+
+  _checkAutoResume() {
+    const resume = sessionStorage.getItem('autoswipe_resume');
+    if (resume === this.config.platformId) {
+      sessionStorage.removeItem('autoswipe_resume');
+      this.start();
+    }
   }
 
   start() {

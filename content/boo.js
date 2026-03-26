@@ -1,7 +1,19 @@
+function needsRefresh() {
+  const btn = document.querySelector('button[aria-label="Love"]');
+  if (!btn) return false;
+  const canvas = btn.querySelector('canvas');
+  return canvas && canvas.width === 0 && canvas.height === 0;
+}
+
 const engine = new AutoSwipeEngine({
   platformId: 'boo',
 
   async beforeSwipe() {
+    if (needsRefresh()) {
+      engine.scheduleReload();
+      return 'skip';
+    }
+
     const btn = document.querySelector('button[aria-label="Love"]');
     if (!btn) return false;
 
@@ -20,6 +32,10 @@ const engine = new AutoSwipeEngine({
   },
 
   afterSwipe() {
+    if (needsRefresh()) {
+      engine.scheduleReload();
+      return;
+    }
     if (!document.querySelector('button[aria-label="Love"]')) return false;
   },
 });
