@@ -5,7 +5,6 @@
   "description": "Auto-swipe (like) profiles on Tinder, Bumble, Badoo, and Boo.",
   "permissions": [
     "storage",
-    "activeTab",
     "tabs",
     "debugger"
   ],
