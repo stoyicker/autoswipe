@@ -104,13 +104,14 @@ async function handleSendClick(msg, sender) {
   }
 
   // Send trusted mouse click via Chrome DevTools Protocol
+  // Fire-and-forget all events with delays — some sites cause CDP commands to hang
   await chrome.debugger.sendCommand({ tabId }, 'Input.dispatchMouseEvent', {
     type: 'mouseMoved',
     x,
     y,
   });
 
-  await chrome.debugger.sendCommand({ tabId }, 'Input.dispatchMouseEvent', {
+  chrome.debugger.sendCommand({ tabId }, 'Input.dispatchMouseEvent', {
     type: 'mousePressed',
     x,
     y,
@@ -118,7 +119,9 @@ async function handleSendClick(msg, sender) {
     clickCount: 1,
   });
 
-  await chrome.debugger.sendCommand({ tabId }, 'Input.dispatchMouseEvent', {
+  await new Promise((r) => setTimeout(r, 50));
+
+  chrome.debugger.sendCommand({ tabId }, 'Input.dispatchMouseEvent', {
     type: 'mouseReleased',
     x,
     y,

@@ -90,6 +90,7 @@ class AutoSwipeEngine {
 
   start() {
     if (this.running) return;
+    console.log(`[AS:${this.config.platformId}] started`);
     this.running = true;
     this.tickId++;
     this._tick(this.tickId);
@@ -97,6 +98,7 @@ class AutoSwipeEngine {
 
   stop() {
     if (!this.running) return;
+    console.log(`[AS:${this.config.platformId}] stopped`);
     this.running = false;
     this.tickId++;
     if (this.timeout) {
@@ -155,9 +157,13 @@ class AutoSwipeEngine {
     if (!this.running || myTickId !== this.tickId) return;
 
     const key = this.config.key || 'ArrowRight';
+    console.log(`[AS:${this.config.platformId}] sending key: ${key}`);
     try {
-      await chrome.runtime.sendMessage({ type: 'SEND_KEY', key });
-    } catch {}
+      const result = await chrome.runtime.sendMessage({ type: 'SEND_KEY', key });
+      console.log(`[AS:${this.config.platformId}] SEND_KEY result:`, result);
+    } catch (e) {
+      console.log(`[AS:${this.config.platformId}] SEND_KEY error:`, e.message);
+    }
   }
 
   _randomDelay() {

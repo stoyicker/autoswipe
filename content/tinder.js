@@ -21,25 +21,7 @@ function hasUpsellPopup() {
 
 function hasBeacon() {
   const output = document.querySelector('output');
-  if (output) {
-    if (output.querySelector('span[class*="beacon__"]')) {
-      console.log('[AS] hasBeacon: found beacon span in <output>');
-      return true;
-    }
-  }
-
-  // "Back to Explore" button means the group is exhausted (explore groups only)
-  if (getPage() !== 'recs') {
-    const buttons = document.querySelectorAll('button');
-    for (const btn of buttons) {
-      if (btn.textContent.includes('Back to Explore')) {
-        console.log('[AS] hasBeacon: found "Back to Explore" button');
-        return true;
-      }
-    }
-  }
-
-  return false;
+  return !!output?.querySelector('span[class*="beacon__"]');
 }
 
 function getGroupButtons() {
