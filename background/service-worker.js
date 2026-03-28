@@ -45,6 +45,13 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       );
       return true;
 
+    case 'CLICK_ELEMENT':
+      handleClickElement(msg, sender).then(
+        (result) => sendResponse(result),
+        (err) => sendResponse({ ok: false, error: err.message })
+      );
+      return true;
+
     case 'DETACH_DEBUGGER':
       if (sender.tab?.id && attachedTabs.has(sender.tab.id)) {
         chrome.debugger.detach({ tabId: sender.tab.id }).catch(() => {});
@@ -127,6 +134,48 @@ async function handleSendClick(msg, sender) {
     y,
     button: 'left',
     clickCount: 1,
+  });
+
+  return { ok: true };
+}
+
+async function handleClickElement(msg, sender) {
+  const tabId = sender.tab?.id;
+  if (!tabId) return { ok: false, error: 'No tab' };
+
+  const { selector } = msg;
+
+  if (!attachedTabs.has(tabId)) {
+    await chrome.debugger.attach({ tabId }, '1.3');
+    attachedTabs.add(tabId);
+  }
+
+  // Find the element and focus it via CDP
+  const { root } = await chrome.debugger.sendCommand({ tabId }, 'DOM.getDocument');
+  const { nodeId } = await chrome.debugger.sendCommand({ tabId }, 'DOM.querySelector', {
+    nodeId: root.nodeId,
+    selector,
+  });
+
+  if (!nodeId) return { ok: false, error: 'Element not found' };
+
+  // Get element coordinates from CDP and click them
+  const { model } = await chrome.debugger.sendCommand({ tabId }, 'DOM.getBoxModel', { nodeId });
+  const x = Math.round((model.content[0] + model.content[2] + model.content[4] + model.content[6]) / 4);
+  const y = Math.round((model.content[1] + model.content[3] + model.content[5] + model.content[7]) / 4);
+
+  await chrome.debugger.sendCommand({ tabId }, 'Input.dispatchMouseEvent', {
+    type: 'mouseMoved', x, y,
+  });
+
+  chrome.debugger.sendCommand({ tabId }, 'Input.dispatchMouseEvent', {
+    type: 'mousePressed', x, y, button: 'left', clickCount: 1,
+  });
+
+  await new Promise((r) => setTimeout(r, 50));
+
+  chrome.debugger.sendCommand({ tabId }, 'Input.dispatchMouseEvent', {
+    type: 'mouseReleased', x, y, button: 'left', clickCount: 1,
   });
 
   return { ok: true };

@@ -26,17 +26,15 @@ const engine = new AutoSwipeEngine({
       return false;
     }
 
-    const rect = btn.getBoundingClientRect();
-    const x = Math.round(rect.left + rect.width / 2);
-    const y = Math.round(rect.top + rect.height / 2);
-    console.log(`[AS] clicking Love at (${x}, ${y})`, rect);
-
     try {
-      const result = await chrome.runtime.sendMessage({ type: 'SEND_CLICK', x, y });
-      console.log('[AS] SEND_CLICK result:', result);
+      const result = await chrome.runtime.sendMessage({
+        type: 'CLICK_ELEMENT',
+        selector: 'button[aria-label="Love"]',
+      });
+      console.log('[AS] CLICK_ELEMENT result:', result);
       if (!result?.ok) return false;
     } catch (e) {
-      console.log('[AS] SEND_CLICK error:', e.message);
+      console.log('[AS] CLICK_ELEMENT error:', e.message);
       return false;
     }
 
