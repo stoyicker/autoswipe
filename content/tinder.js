@@ -14,9 +14,14 @@ function getPage() {
   return 'recs';
 }
 
-function hasUpsellPopup() {
+function getVisibleDialog() {
   const dialog = document.querySelector('div[role="dialog"]');
-  return dialog && dialog.offsetParent !== null;
+  if (dialog && dialog.offsetParent !== null) return dialog;
+  return null;
+}
+
+function isPlatinumUpsell(dialog) {
+  return dialog && dialog.innerText.includes('Tinder Platinum');
 }
 
 function hasBeacon() {
@@ -60,7 +65,13 @@ const engine = new AutoSwipeEngine({
     const page = getPage();
     console.log(`[AS] beforeSwipe page=${page}, url=${window.location.pathname}, groupIndex=${groupIndex}, waitingForGroupLoad=${waitingForGroupLoad}`);
 
-    if (hasUpsellPopup()) {
+    const dialog = getVisibleDialog();
+    if (dialog) {
+      if (isPlatinumUpsell(dialog)) {
+        console.log('[AS] Platinum upsell — dismissing with ESC');
+        chrome.runtime.sendMessage({ type: 'SEND_KEY', key: 'Escape' });
+        return 'skip';
+      }
       console.log('[AS] upsell popup detected — stopping');
       return false;
     }
@@ -119,7 +130,15 @@ const engine = new AutoSwipeEngine({
   },
 
   afterSwipe() {
-    if (hasUpsellPopup()) return false;
+    const dialog = getVisibleDialog();
+    if (dialog) {
+      if (isPlatinumUpsell(dialog)) {
+        console.log('[AS] afterSwipe: Platinum upsell — dismissing with ESC');
+        chrome.runtime.sendMessage({ type: 'SEND_KEY', key: 'Escape' });
+        return;
+      }
+      return false;
+    }
     if (!waitingForGroupLoad && hasBeacon()) return false;
   },
 });

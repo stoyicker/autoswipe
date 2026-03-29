@@ -83,16 +83,16 @@ async function handleSendKey(msg, sender) {
     type: 'keyDown',
     key,
     code: key,
-    windowsVirtualKeyCode: key === 'ArrowRight' ? 39 : key === 'ArrowLeft' ? 37 : 0,
-    nativeVirtualKeyCode: key === 'ArrowRight' ? 39 : key === 'ArrowLeft' ? 37 : 0,
+    windowsVirtualKeyCode: { ArrowRight: 39, ArrowLeft: 37, Escape: 27 }[key] || 0,
+    nativeVirtualKeyCode: { ArrowRight: 39, ArrowLeft: 37, Escape: 27 }[key] || 0,
   });
 
   await chrome.debugger.sendCommand({ tabId }, 'Input.dispatchKeyEvent', {
     type: 'keyUp',
     key,
     code: key,
-    windowsVirtualKeyCode: key === 'ArrowRight' ? 39 : key === 'ArrowLeft' ? 37 : 0,
-    nativeVirtualKeyCode: key === 'ArrowRight' ? 39 : key === 'ArrowLeft' ? 37 : 0,
+    windowsVirtualKeyCode: { ArrowRight: 39, ArrowLeft: 37, Escape: 27 }[key] || 0,
+    nativeVirtualKeyCode: { ArrowRight: 39, ArrowLeft: 37, Escape: 27 }[key] || 0,
   });
 
   return { ok: true };
