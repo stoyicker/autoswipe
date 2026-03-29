@@ -105,6 +105,9 @@ class AutoSwipeEngine {
       clearTimeout(this.timeout);
       this.timeout = null;
     }
+    if (this._isContextValid()) {
+      chrome.runtime.sendMessage({ type: 'DETACH_DEBUGGER' }).catch(() => {});
+    }
   }
 
   async _tick(myTickId) {
