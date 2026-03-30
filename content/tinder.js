@@ -15,8 +15,13 @@ function getPage() {
 }
 
 function getVisibleDialog() {
-  const dialog = document.querySelector('div[role="dialog"]');
-  if (dialog && dialog.offsetParent !== null) return dialog;
+  const dialogs = document.querySelectorAll('div[role="dialog"]');
+  console.log(`[AS] getVisibleDialog: found ${dialogs.length} dialog(s)`);
+  for (const dialog of dialogs) {
+    const rect = dialog.getBoundingClientRect();
+    console.log(`[AS] dialog rect: ${rect.width}x${rect.height}, text preview: "${dialog.innerText.substring(0, 50)}"`);
+    if (rect.width > 0 && rect.height > 0) return dialog;
+  }
   return null;
 }
 
@@ -129,16 +134,4 @@ const engine = new AutoSwipeEngine({
     }
   },
 
-  afterSwipe() {
-    const dialog = getVisibleDialog();
-    if (dialog) {
-      if (isPlatinumUpsell(dialog)) {
-        console.log('[AS] afterSwipe: Platinum upsell — dismissing with ESC');
-        chrome.runtime.sendMessage({ type: 'SEND_KEY', key: 'Escape' });
-        return;
-      }
-      return false;
-    }
-    if (!waitingForGroupLoad && hasBeacon()) return false;
-  },
 });
