@@ -18,11 +18,9 @@ function getPage() {
 
 function getVisibleDialog() {
   const dialogs = document.querySelectorAll('div[role="dialog"]');
-  console.log(`[AS] getVisibleDialog: found ${dialogs.length} dialog(s)`);
   for (const dialog of dialogs) {
     const rect = dialog.getBoundingClientRect();
-    console.log(`[AS] dialog rect: ${rect.width}x${rect.height}, text preview: "${dialog.innerText.substring(0, 50)}"`);
-    if (rect.width > 0 && rect.height > 0) return dialog;
+    if (rect.width > 0 && rect.height > 0 && dialog.innerText.trim()) return dialog;
   }
   return null;
 }
@@ -67,6 +65,7 @@ async function clickGroupAtIndex(index) {
 const engine = new AutoSwipeEngine({
   platformId: 'tinder',
   key: 'ArrowRight',
+  focusSelector: '#main-content',
 
   beforeSwipe() {
     const page = getPage();

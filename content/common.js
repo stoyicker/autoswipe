@@ -159,6 +159,12 @@ class AutoSwipeEngine {
 
     if (!this.running || myTickId !== this.tickId) return;
 
+    if (this.config.focusSelector) {
+      try {
+        await chrome.runtime.sendMessage({ type: 'CLICK_ELEMENT', selector: this.config.focusSelector });
+      } catch {}
+    }
+
     const key = this.config.key || 'ArrowRight';
     console.log(`[AS:${this.config.platformId}] sending key: ${key}`);
     try {
