@@ -1,14 +1,29 @@
 const engine = new AutoSwipeEngine({
   platformId: 'badoo',
-  key: 'ArrowRight',
 
-  beforeSwipe() {
+  async beforeSwipe() {
+    const btn = document.querySelector('button[data-qa="profile-card-action-vote-yes"]');
+    console.log(`[AS] beforeSwipe: btn=${!!btn}`);
+    if (!btn) return false;
+
+    try {
+      const result = await chrome.runtime.sendMessage({
+        type: 'CLICK_ELEMENT',
+        selector: 'button[data-qa="profile-card-action-vote-yes"]',
+      });
+      console.log('[AS] CLICK_ELEMENT result:', result);
+      if (!result?.ok) return false;
+    } catch (e) {
+      console.log('[AS] CLICK_ELEMENT error:', e.message);
+      return false;
+    }
+
+    return 'skip';
+  },
+
+  afterSwipe() {
     const allDone = document.body.innerText.includes("That's all for now!");
-    console.log(`[AS] beforeSwipe: allDone=${allDone}`);
+    console.log(`[AS] afterSwipe: allDone=${allDone}`);
     if (allDone) return false;
-
-    // TODO: Verify that ArrowRight keypress actually works for swiping on Badoo
-    alert('[AutoSwipe] Badoo support is not yet verified.\nSwiping may not work correctly.');
-    return false;
   },
 });
