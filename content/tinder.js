@@ -6,6 +6,8 @@
 let groupIndex = 0;
 let navigatingToGrid = false;
 let waitingForGroupLoad = false;
+let groupLoadStartTime = 0;
+const GROUP_LOAD_TIMEOUT = 5000;
 
 function getPage() {
   const path = window.location.pathname;
@@ -93,14 +95,23 @@ const engine = new AutoSwipeEngine({
       // After clicking a group, wait for profiles to load (beacon to disappear)
       if (waitingForGroupLoad) {
         const beacon = hasBeacon();
-        console.log(`[AS] waitingForGroupLoad: hasBeacon=${beacon}, page=${getPage()}, url=${window.location.pathname}`);
+        const elapsed = Date.now() - groupLoadStartTime;
+        console.log(`[AS] waitingForGroupLoad: hasBeacon=${beacon}, elapsed=${elapsed}ms`);
         if (beacon) {
-          return 'skip';
+          if (elapsed > GROUP_LOAD_TIMEOUT) {
+            console.log(`[AS] group ${groupIndex} timed out, trying next`);
+            waitingForGroupLoad = false;
+            groupIndex++;
+            // Fall through to the hasBeacon() block below to click next group
+          } else {
+            return 'skip';
+          }
+        } else {
+          console.log(`[AS] group ${groupIndex} loaded, resuming swipes`);
+          waitingForGroupLoad = false;
+          groupIndex++;
+          return;
         }
-        console.log(`[AS] group ${groupIndex} loaded, resuming swipes`);
-        waitingForGroupLoad = false;
-        groupIndex++;
-        return;
       }
 
       if (hasBeacon()) {
@@ -115,6 +126,7 @@ const engine = new AutoSwipeEngine({
 
         // On explore grid — click the next group
         waitingForGroupLoad = true;
+        groupLoadStartTime = Date.now();
         const clickIdx = groupIndex;
         clickGroupAtIndex(clickIdx).then((ok) => {
           console.log(`[AS] clickGroupAtIndex(${clickIdx}) result: ${ok}`);
