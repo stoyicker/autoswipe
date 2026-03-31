@@ -53,6 +53,22 @@ const engine = new AutoSwipeEngine({
   },
 
   async afterSwipe() {
+    const moreSouls = [...document.querySelectorAll('p')].some(
+      (p) => p.textContent.includes('More souls are online right now!')
+    );
+    if (moreSouls) {
+      console.log('[AS] "More souls" detected, clicking Pass');
+      try {
+        await chrome.runtime.sendMessage({
+          type: 'CLICK_ELEMENT',
+          selector: 'button[aria-label="Pass"]',
+        });
+      } catch (e) {
+        console.log('[AS] Pass click error:', e.message);
+      }
+      return;
+    }
+
     if (needsRefresh()) {
       engine.scheduleReload();
       return;

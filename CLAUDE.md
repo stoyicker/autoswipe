@@ -1,0 +1,1 @@
+When the user's message is just "deploy" (optionally followed by "patch", "minor", or "major"), invoke the `/deploy` skill. Do not invoke it if "deploy" appears as part of a question or conversation (e.g. "how does deploy work").
