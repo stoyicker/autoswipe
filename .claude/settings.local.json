@@ -11,7 +11,8 @@
       "Bash(zip -r \"C:/Users/jorg3/Desktop/autoswipe-extension.zip\" manifest.json background/ content/ icons/ popup/ -x \"*.git*\" \"skills-lock.json\")",
       "Bash(powershell -Command \"Compress-Archive -Path manifest.json, background, content, icons, popup -DestinationPath ''C:/Users/jorg3/Desktop/autoswipe-extension.zip'' -Force\")",
       "Bash(curl:*)",
-      "Bash(python3:*)"
+      "Bash(python3:*)",
+      "Skill(update-config)"
     ]
   }
 }
