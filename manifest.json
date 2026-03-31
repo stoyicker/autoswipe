@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "AutoSwipe",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Auto-swipe (like) profiles on Tinder, Bumble, Badoo, and Boo.",
   "permissions": [
     "storage",
