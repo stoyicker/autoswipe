@@ -80,12 +80,20 @@ class AutoSwipeEngine {
     window.location.reload();
   }
 
-  _checkAutoResume() {
+  async _checkAutoResume() {
     const resume = sessionStorage.getItem('autoswipe_resume');
-    if (resume === this.config.platformId) {
-      sessionStorage.removeItem('autoswipe_resume');
-      this.start();
+    if (resume !== this.config.platformId) return;
+
+    const title = document.querySelector('title')?.textContent || '';
+    if (title.startsWith('ERROR:')) {
+      console.log(`[AS:${this.config.platformId}] error page detected, retrying in 30s...`);
+      await new Promise((r) => setTimeout(r, 30000));
+      window.location.reload();
+      return;
     }
+
+    sessionStorage.removeItem('autoswipe_resume');
+    this.start();
   }
 
   start() {
