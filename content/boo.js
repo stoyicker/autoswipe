@@ -2,7 +2,8 @@ function needsRefresh() {
   const btn = document.querySelector('button[aria-label="Love"]');
   if (!btn) return false;
   const canvas = btn.querySelector('canvas');
-  const result = canvas && canvas.width === 0 && canvas.height === 0;
+  const style = canvas?.style;
+  const result = canvas && style?.width === '0px' && style?.height === '0px';
   if (result) console.log('[AS] needsRefresh: canvas is 0x0');
   return result;
 }
