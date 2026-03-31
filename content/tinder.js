@@ -38,6 +38,33 @@ function getGroupButtons() {
   return Array.from(document.querySelectorAll('button[class*="Fxb"]'));
 }
 
+function getLikeButton() {
+  const spans = document.querySelectorAll('span.Hidden');
+  for (const span of spans) {
+    if (span.textContent === 'Like') return span.closest('button');
+  }
+  return null;
+}
+
+async function clickLikeButton() {
+  const btn = getLikeButton();
+  if (!btn) return false;
+  btn.setAttribute('data-autoswipe-target', '');
+  try {
+    const result = await chrome.runtime.sendMessage({
+      type: 'CLICK_ELEMENT',
+      selector: 'button[data-autoswipe-target]',
+    });
+    console.log('[AS] Like click result:', result);
+    return result?.ok ?? false;
+  } catch (e) {
+    console.log('[AS] Like click error:', e.message);
+    return false;
+  } finally {
+    btn.removeAttribute('data-autoswipe-target');
+  }
+}
+
 async function clickGroupAtIndex(index) {
   const buttons = getGroupButtons();
   console.log(`[AS] clickGroupAtIndex(${index}): ${buttons.length} buttons found`);
@@ -64,10 +91,8 @@ async function clickGroupAtIndex(index) {
 
 const engine = new AutoSwipeEngine({
   platformId: 'tinder',
-  key: 'ArrowRight',
-  focusSelector: '#main-content',
 
-  beforeSwipe() {
+  async beforeSwipe() {
     const page = getPage();
     console.log(`[AS] beforeSwipe page=${page}, url=${window.location.pathname}, groupIndex=${groupIndex}, waitingForGroupLoad=${waitingForGroupLoad}`);
 
@@ -87,7 +112,9 @@ const engine = new AutoSwipeEngine({
         console.log('[AS] beacon on recs — stopping');
         return false;
       }
-      return;
+      const ok = await clickLikeButton();
+      if (!ok) return false;
+      return 'skip';
     }
 
     if (page === 'explore' || page === 'explore-group') {
@@ -109,7 +136,9 @@ const engine = new AutoSwipeEngine({
           console.log(`[AS] group ${groupIndex} loaded, resuming swipes`);
           waitingForGroupLoad = false;
           groupIndex++;
-          return;
+          const ok = await clickLikeButton();
+          if (!ok) return false;
+          return 'skip';
         }
       }
 
@@ -141,7 +170,9 @@ const engine = new AutoSwipeEngine({
       }
 
       console.log('[AS] profiles visible — swiping');
-      return;
+      const ok = await clickLikeButton();
+      if (!ok) return false;
+      return 'skip';
     }
   },
 

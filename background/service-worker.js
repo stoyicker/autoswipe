@@ -53,8 +53,11 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       return true;
 
     case 'DETACH_DEBUGGER':
+      console.log(`[AS-BG] DETACH_DEBUGGER: tabId=${sender.tab?.id}, attached=${attachedTabs.has(sender.tab?.id)}`);
       if (sender.tab?.id && attachedTabs.has(sender.tab.id)) {
-        chrome.debugger.detach({ tabId: sender.tab.id }).catch(() => {});
+        chrome.debugger.detach({ tabId: sender.tab.id })
+          .then(() => console.log(`[AS-BG] debugger detached`))
+          .catch((e) => console.log(`[AS-BG] detach error: ${e.message}`));
         attachedTabs.delete(sender.tab.id);
       }
       sendResponse({ ok: true });
@@ -124,7 +127,7 @@ async function handleSendClick(msg, sender) {
     y,
     button: 'left',
     clickCount: 1,
-  });
+  }).catch(() => {});
 
   await new Promise((r) => setTimeout(r, 50));
 
@@ -134,7 +137,7 @@ async function handleSendClick(msg, sender) {
     y,
     button: 'left',
     clickCount: 1,
-  });
+  }).catch(() => {});
 
   return { ok: true };
 }
@@ -170,13 +173,13 @@ async function handleClickElement(msg, sender) {
 
   chrome.debugger.sendCommand({ tabId }, 'Input.dispatchMouseEvent', {
     type: 'mousePressed', x, y, button: 'left', clickCount: 1,
-  });
+  }).catch(() => {});
 
   await new Promise((r) => setTimeout(r, 50));
 
   chrome.debugger.sendCommand({ tabId }, 'Input.dispatchMouseEvent', {
     type: 'mouseReleased', x, y, button: 'left', clickCount: 1,
-  });
+  }).catch(() => {});
 
   return { ok: true };
 }

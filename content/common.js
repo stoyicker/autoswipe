@@ -161,8 +161,11 @@ class AutoSwipeEngine {
 
     if (this.config.focusSelector) {
       try {
-        await chrome.runtime.sendMessage({ type: 'CLICK_ELEMENT', selector: this.config.focusSelector });
-      } catch {}
+        const focusResult = await chrome.runtime.sendMessage({ type: 'CLICK_ELEMENT', selector: this.config.focusSelector });
+        console.log(`[AS:${this.config.platformId}] focus click result:`, focusResult);
+      } catch (e) {
+        console.log(`[AS:${this.config.platformId}] focus click error:`, e.message);
+      }
     }
 
     const key = this.config.key || 'ArrowRight';
