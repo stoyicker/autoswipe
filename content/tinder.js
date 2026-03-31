@@ -20,7 +20,11 @@ function getVisibleDialog() {
   const dialogs = document.querySelectorAll('div[role="dialog"]');
   for (const dialog of dialogs) {
     const rect = dialog.getBoundingClientRect();
-    if (rect.width > 0 && rect.height > 0 && dialog.innerText.trim()) return dialog;
+    if (rect.width > 0 && rect.height > 0 && dialog.innerText.trim()) {
+      // "Back to Explore" is the end-of-group screen, not an upsell
+      if (dialog.innerText.includes('Back to Explore')) continue;
+      return dialog;
+    }
   }
   return null;
 }
