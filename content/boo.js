@@ -7,13 +7,24 @@ function needsRefresh() {
   return result;
 }
 
+function hasLoveButton() {
+  return !!document.querySelector('button[aria-label="Love"]');
+}
+
+async function waitForLoveButton() {
+  console.log('[AS] Love button missing, waiting 30s...');
+  await new Promise((r) => setTimeout(r, 30000));
+  const found = hasLoveButton();
+  console.log(`[AS] after 30s wait: btn=${found}`);
+  return found;
+}
+
 const engine = new AutoSwipeEngine({
   platformId: 'boo',
 
   async beforeSwipe() {
     const refreshNeeded = needsRefresh();
-    const btn = document.querySelector('button[aria-label="Love"]');
-    console.log(`[AS] beforeSwipe: btn=${!!btn}, needsRefresh=${refreshNeeded}`);
+    console.log(`[AS] beforeSwipe: btn=${hasLoveButton()}, needsRefresh=${refreshNeeded}`);
 
     if (refreshNeeded) {
       console.log('[AS] scheduling reload');
@@ -21,9 +32,9 @@ const engine = new AutoSwipeEngine({
       return 'skip';
     }
 
-    if (!btn) {
-      console.log('[AS] no Love button — stopping');
-      return false;
+    if (!hasLoveButton()) {
+      const came_back = await waitForLoveButton();
+      if (!came_back) return false;
     }
 
     try {
@@ -41,18 +52,14 @@ const engine = new AutoSwipeEngine({
     return 'skip';
   },
 
-  afterSwipe() {
-    const refreshNeeded = needsRefresh();
-    const btn = document.querySelector('button[aria-label="Love"]');
-    console.log(`[AS] afterSwipe: btn=${!!btn}, needsRefresh=${refreshNeeded}`);
-
-    if (refreshNeeded) {
+  async afterSwipe() {
+    if (needsRefresh()) {
       engine.scheduleReload();
       return;
     }
-    if (!btn) {
-      console.log('[AS] afterSwipe: no Love button — stopping');
-      return false;
+    if (!hasLoveButton()) {
+      const came_back = await waitForLoveButton();
+      if (!came_back) return false;
     }
   },
 });
