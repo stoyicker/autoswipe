@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "AutoSwipe",
+  "name": "AutoSwipe (Dev)",
   "version": "1.2.2",
   "description": "Auto-swipe (like) profiles on Tinder, Bumble, Badoo, and Boo.",
   "permissions": [
@@ -24,9 +24,9 @@
   "action": {
     "default_popup": "popup/popup.html",
     "default_icon": {
-      "16": "icons/icon16.png",
-      "48": "icons/icon48.png",
-      "128": "icons/icon128.png"
+      "16": "icons-dev/icon16.png",
+      "48": "icons-dev/icon48.png",
+      "128": "icons-dev/icon128.png"
     }
   },
   "content_scripts": [
@@ -52,8 +52,8 @@
     }
   ],
   "icons": {
-    "16": "icons/icon16.png",
-    "48": "icons/icon48.png",
-    "128": "icons/icon128.png"
+    "16": "icons-dev/icon16.png",
+    "48": "icons-dev/icon48.png",
+    "128": "icons-dev/icon128.png"
   }
 }

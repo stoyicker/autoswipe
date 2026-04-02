@@ -12,7 +12,10 @@
       "Bash(powershell -Command \"Compress-Archive -Path manifest.json, background, content, icons, popup -DestinationPath ''C:/Users/jorg3/Desktop/autoswipe-extension.zip'' -Force\")",
       "Bash(curl:*)",
       "Bash(python3:*)",
-      "Skill(update-config)"
+      "Skill(update-config)",
+      "Bash(magick icons/icon128.png -modulate 100,100,50 -gravity South -fill white -strokewidth 1 -stroke black -font Arial-Bold -pointsize 28 -annotate +0+8 \"DEV\" icons-dev/icon128.png)",
+      "Bash(magick icons-dev/icon128.png -resize 48x48 icons-dev/icon48.png)",
+      "Bash(magick icons-dev/icon128.png -resize 16x16 icons-dev/icon16.png)"
     ]
   }
 }

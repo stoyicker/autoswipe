@@ -100,6 +100,22 @@ const engine = new AutoSwipeEngine({
     const page = getPage();
     console.log(`[AS] beforeSwipe page=${page}, url=${window.location.pathname}, groupIndex=${groupIndex}, waitingForGroupLoad=${waitingForGroupLoad}`);
 
+    const matchH1 = [...document.querySelectorAll('h1')].find(
+      (h1) => h1.textContent.startsWith('You matched with')
+    );
+    if (matchH1) {
+      console.log('[AS] match popup detected — dismissing');
+      try {
+        await chrome.runtime.sendMessage({
+          type: 'CLICK_ELEMENT',
+          selector: 'button[title="Back to Tinder"]',
+        });
+      } catch (e) {
+        console.log('[AS] Back to Tinder click error:', e.message);
+      }
+      return 'skip';
+    }
+
     const dialog = getVisibleDialog();
     if (dialog) {
       if (isPlatinumUpsell(dialog)) {

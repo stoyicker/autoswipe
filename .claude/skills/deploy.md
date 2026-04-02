@@ -27,13 +27,14 @@ Deploy the extension by bumping the version, committing, pushing, and packaging 
 
 5. **Push** to the remote.
 
-6. **Package** the extension into a zip at `C:/Users/jorg3/Desktop/autoswipe-extension.zip` containing only these paths:
-   - `manifest.json`
-   - `background/`
-   - `content/`
-   - `icons/`
-   - `popup/`
-
-   Use: `powershell -Command "Compress-Archive -Path manifest.json, background, content, icons, popup -DestinationPath 'C:/Users/jorg3/Desktop/autoswipe-extension.zip' -Force"`
+6. **Package** the extension into a zip at `C:/Users/jorg3/Desktop/autoswipe-extension.zip`:
+   - Before zipping, temporarily apply these edits to `manifest.json` using the Edit tool:
+     - Replace `"name": "AutoSwipe (Dev)"` with `"name": "AutoSwipe"`
+     - Replace all `icons-dev/` with `icons/` (use `replace_all: true`)
+   - Zip these paths: `manifest.json`, `background/`, `content/`, `icons/`, `popup/`
+   - Use: `powershell -Command "Compress-Archive -Path manifest.json, background, content, icons, popup -DestinationPath 'C:/Users/jorg3/Desktop/autoswipe-extension.zip' -Force"`
+   - After zipping, revert manifest.json using the Edit tool:
+     - Replace `"name": "AutoSwipe"` with `"name": "AutoSwipe (Dev)"`
+     - Replace all `icons/` with `icons-dev/` (use `replace_all: true`)
 
 7. Report the new version and confirm the zip location.
