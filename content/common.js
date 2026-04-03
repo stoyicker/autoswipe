@@ -4,10 +4,13 @@
  *
  * State: content script owns `running`. Popup queries via GET_STATUS.
  */
+const STORE_EXTENSION_ID = 'oicgamlmgkccdkkaaaendinajbcmkiim';
+
 class AutoSwipeEngine {
   constructor(config) {
     this.config = config;
     this.running = false;
+    this._isStoreVersion = chrome.runtime.id === STORE_EXTENSION_ID;
     this.timeout = null;
     this.minDelay = 1000;
     this.maxDelay = 3000;
@@ -98,6 +101,11 @@ class AutoSwipeEngine {
 
   start() {
     if (this.running) return;
+    if (!this._isStoreVersion && document.documentElement.dataset.autoswipeStore === 'active') {
+      console.log(`[AS:${this.config.platformId}] store version is active, deferring`);
+      return;
+    }
+    if (this._isStoreVersion) document.documentElement.dataset.autoswipeStore = 'active';
     console.log(`[AS:${this.config.platformId}] started`);
     this.running = true;
     this.tickId++;
@@ -108,6 +116,7 @@ class AutoSwipeEngine {
     if (!this.running) return;
     console.log(`[AS:${this.config.platformId}] stopped`);
     this.running = false;
+    if (this._isStoreVersion) delete document.documentElement.dataset.autoswipeStore;
     this.tickId++;
     if (this.timeout) {
       clearTimeout(this.timeout);
