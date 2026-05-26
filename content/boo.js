@@ -14,7 +14,7 @@ function hasLoveButton() {
 
 async function waitForLoveButton() {
   console.log('[AS] Love button missing, waiting 1 day...');
-  await new Promise((r) => setTimeout(r, 86,400,000));
+  await new Promise((r) => setTimeout(r, 86400000));
   const found = hasLoveButton();
   console.log(`[AS] after 30s wait: btn=${found}`);
   return found;
