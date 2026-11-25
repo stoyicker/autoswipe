@@ -12,6 +12,11 @@ function hasLoveButton() {
   return !!document.querySelector('button[aria-label="Love"]');
 }
 
+function hasMoreSoulsCard() {
+  const visibleText = document.body.innerText.replace(/\s+/g, ' ');
+  return /more souls are online right now/i.test(visibleText);
+}
+
 async function waitForLoveButton() {
   console.log('[AS] Love button missing, waiting 1 day...');
   await new Promise((r) => setTimeout(r, 86400000));
@@ -24,6 +29,20 @@ const engine = new AutoSwipeEngine({
   platformId: 'boo',
 
   async beforeSwipe() {
+    if (hasMoreSoulsCard()) {
+      console.log('[AS] "More souls" detected, clicking Pass');
+      try {
+        const result = await chrome.runtime.sendMessage({
+          type: 'CLICK_ELEMENT',
+          selector: 'button[aria-label="Pass"]',
+        });
+        if (!result?.ok) console.log('[AS] Pass click failed:', result?.error);
+      } catch (e) {
+        console.log('[AS] Pass click error:', e.message);
+      }
+      return 'skip';
+    }
+
     const refreshNeeded = needsRefresh();
     console.log(`[AS] beforeSwipe: btn=${hasLoveButton()}, needsRefresh=${refreshNeeded}`);
 
@@ -36,6 +55,7 @@ const engine = new AutoSwipeEngine({
     if (!hasLoveButton()) {
       const came_back = await waitForLoveButton();
       if (!came_back) return false;
+      return 'skip';
     }
 
     try {
@@ -54,21 +74,7 @@ const engine = new AutoSwipeEngine({
   },
 
   async afterSwipe() {
-    const moreSouls = [...document.querySelectorAll('p')].some(
-      (p) => p.textContent.includes('More souls are online right now!')
-    );
-    if (moreSouls) {
-      console.log('[AS] "More souls" detected, clicking Pass');
-      try {
-        await chrome.runtime.sendMessage({
-          type: 'CLICK_ELEMENT',
-          selector: 'button[aria-label="Pass"]',
-        });
-      } catch (e) {
-        console.log('[AS] Pass click error:', e.message);
-      }
-      return;
-    }
+    if (hasMoreSoulsCard()) return;
 
     if (needsRefresh()) {
       engine.scheduleReload();
