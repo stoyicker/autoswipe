@@ -1,6 +1,5 @@
 const SITES = {
   tinder: { name: 'Tinder', icon: '\u{1F525}', pattern: 'tinder.com' },
-  bumble: { name: 'Bumble', icon: '\u{1F41D}', pattern: 'bumble.com' },
   badoo:  { name: 'Badoo',  icon: '\u{1F49C}', pattern: 'badoo.com' },
   boo:    { name: 'Boo',    icon: '\u{1F47B}', pattern: 'boo.world' },
 };

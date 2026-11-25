@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "AutoSwipe (Dev)",
   "version": "1.2.6",
-  "description": "Auto-swipe (like) profiles on Tinder, Bumble, Badoo, and Boo.",
+  "description": "Auto-swipe (like) profiles on Tinder, Badoo, and Boo.",
   "permissions": [
     "storage",
     "tabs",
@@ -11,8 +11,6 @@
   "host_permissions": [
     "https://tinder.com/*",
     "https://*.tinder.com/*",
-    "https://bumble.com/*",
-    "https://*.bumble.com/*",
     "https://badoo.com/*",
     "https://*.badoo.com/*",
     "https://boo.world/*",
@@ -33,11 +31,6 @@
     {
       "matches": ["https://tinder.com/*", "https://*.tinder.com/*"],
       "js": ["content/common.js", "content/tinder.js"],
-      "run_at": "document_idle"
-    },
-    {
-      "matches": ["https://bumble.com/*", "https://*.bumble.com/*"],
-      "js": ["content/common.js", "content/bumble.js"],
       "run_at": "document_idle"
     },
     {

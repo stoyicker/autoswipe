@@ -13,11 +13,11 @@ The extension requests the following browser permissions, used exclusively for i
 - **Storage** — To persist user preferences (swipe delay settings) across browser sessions.
 - **Tabs** — To detect which supported dating site the user is currently on, communicate between the popup, background service worker, and content scripts, and broadcast setting changes to open tabs.
 - **Debugger** — To simulate trusted user input (mouse clicks and keyboard events) on supported dating sites, as these sites reject programmatic events.
-- **Host permissions (tinder.com, bumble.com, badoo.com, boo.world)** — To inject content scripts that detect profiles, handle swipe actions, and detect out-of-profiles states.
+- **Host permissions (tinder.com, badoo.com, boo.world)** — To inject content scripts that detect profiles, handle swipe actions, and detect out-of-profiles states.
 
 ## Third-Party Services
 
-This extension interacts only with tinder.com, bumble.com, badoo.com, and boo.world as directed by the user. No data is sent to any other third party.
+This extension interacts only with tinder.com, badoo.com, and boo.world as directed by the user. No data is sent to any other third party.
 
 ## Contact
 

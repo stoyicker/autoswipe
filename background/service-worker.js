@@ -203,8 +203,6 @@ async function broadcastToContentScripts(msg) {
       url: [
         'https://tinder.com/*',
         'https://*.tinder.com/*',
-        'https://bumble.com/*',
-        'https://*.bumble.com/*',
         'https://badoo.com/*',
         'https://*.badoo.com/*',
         'https://boo.world/*',
