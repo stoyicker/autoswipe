@@ -50,23 +50,37 @@ function getLikeButton() {
   return null;
 }
 
-async function clickLikeButton() {
-  const btn = getLikeButton();
-  if (!btn) return false;
-  btn.setAttribute('data-autoswipe-target', '');
+async function clickTinderControl(control, label) {
+  control.setAttribute('data-autoswipe-target', '');
   try {
     const result = await chrome.runtime.sendMessage({
       type: 'CLICK_ELEMENT',
-      selector: 'button[data-autoswipe-target]',
+      selector: '[data-autoswipe-target]',
     });
-    console.log('[AS] Like click result:', result);
+    console.log(`[AS] ${label} click result:`, result);
     return result?.ok ?? false;
   } catch (e) {
-    console.log('[AS] Like click error:', e.message);
+    console.log(`[AS] ${label} click error:`, e.message);
     return false;
   } finally {
-    btn.removeAttribute('data-autoswipe-target');
+    control.removeAttribute('data-autoswipe-target');
   }
+}
+
+async function clickLikeButton() {
+  const button = getLikeButton();
+  return button ? clickTinderControl(button, 'Like') : false;
+}
+
+function getMaybeLaterControl(dialog) {
+  const controls = dialog.querySelectorAll('button, a[href], [role="button"], [role="link"]');
+  return Array.from(controls).find((control) => {
+    if (control.matches(':disabled, [aria-disabled="true"]')) return false;
+    if (control.innerText?.trim().replace(/\s+/g, ' ') !== 'Maybe later') return false;
+
+    const rect = control.getBoundingClientRect();
+    return rect.width > 0 && rect.height > 0 && getComputedStyle(control).visibility === 'visible';
+  });
 }
 
 async function clickGroupAtIndex(index) {
@@ -118,6 +132,9 @@ const engine = new AutoSwipeEngine({
 
     const dialog = getVisibleDialog();
     if (dialog) {
+      const maybeLater = getMaybeLaterControl(dialog);
+      if (maybeLater && await clickTinderControl(maybeLater, 'Maybe later')) return 'skip';
+
       if (isPlatinumUpsell(dialog)) {
         console.log('[AS] Platinum upsell — dismissing with ESC');
         chrome.runtime.sendMessage({ type: 'SEND_KEY', key: 'Escape' });
